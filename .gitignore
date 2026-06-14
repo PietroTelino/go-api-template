@@ -1,0 +1,20 @@
+# Variáveis de ambiente
+.env
+
+# Binários compilados
+bin/
+dist/
+tmp/
+
+# Dependências
+vendor/
+
+# Gerados pelo sistema operacional
+.DS_Store
+Thumbs.db
+
+# Gerados por IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
