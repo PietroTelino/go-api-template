@@ -15,6 +15,11 @@ type Config struct {
 	DBName     string
 	DBUser     string
 	DBPassword string
+
+	JWTSecret                  string
+	JWTExpiresInSeconds        int
+	JWTRefreshSecret           string
+	JWTRefreshExpiresInSeconds int
 }
 
 func Load() *Config {
@@ -29,6 +34,11 @@ func Load() *Config {
 		DBName:     require("DB_NAME"),
 		DBUser:     require("DB_USER"),
 		DBPassword: require("DB_PASSWORD"),
+
+		JWTSecret:                  require("JWT_SECRET"),
+		JWTExpiresInSeconds:        getInt("JWT_EXPIRES_IN_SECONDS", 900),
+		JWTRefreshSecret:           require("JWT_REFRESH_SECRET"),
+		JWTRefreshExpiresInSeconds: getInt("JWT_REFRESH_EXPIRES_IN_SECONDS", 604800),
 	}
 }
 

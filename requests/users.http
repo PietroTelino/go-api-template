@@ -1,0 +1,27 @@
+### Registrar usuário
+POST http://localhost:3333/users
+Content-Type: application/json
+
+{
+  "name": "Usuário teste 01",
+  "email": "usuarioteste01@email.com",
+  "password": "12345678"
+}
+
+### Tentar registrar com o mesmo email (deve retornar 409)
+POST http://localhost:3333/users
+Content-Type: application/json
+
+{
+  "name": "Usuário teste 01",
+  "email": "usuarioteste01@email.com",
+  "password": "12345678"
+}
+
+### Tentar registrar sem campos obrigatórios (deve retornar 400)
+POST http://localhost:3333/users
+Content-Type: application/json
+
+{
+  "name": "Usuário teste 01"
+}
