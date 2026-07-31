@@ -4,14 +4,18 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+
+	"github.com/PietroTelino/go-api-template/internal/i18n"
+	"github.com/PietroTelino/go-api-template/internal/response"
 )
 
 type Handler struct {
-	service *Service
+	service    *Service
+	translator *i18n.Translator
 }
 
-func NewHandler(service *Service) *Handler {
-	return &Handler{service: service}
+func NewHandler(service *Service, translator *i18n.Translator) *Handler {
+	return &Handler{service: service, translator: translator}
 }
 
 func (handler *Handler) Register(writer http.ResponseWriter, request *http.Request) {
@@ -22,12 +26,12 @@ func (handler *Handler) Register(writer http.ResponseWriter, request *http.Reque
 	}
 
 	if err := json.NewDecoder(request.Body).Decode(&body); err != nil {
-		writeError(writer, http.StatusBadRequest, "Corpo da requisição inválido")
+		response.WriteTranslatedError(writer, request, handler.translator, http.StatusBadRequest, "common.invalidRequestBody")
 		return
 	}
 
 	if body.Name == "" || body.Email == "" || body.Password == "" {
-		writeError(writer, http.StatusBadRequest, "Name, email e password são obrigatórios")
+		response.WriteTranslatedError(writer, request, handler.translator, http.StatusBadRequest, "user.fieldRequired")
 		return
 	}
 
@@ -38,24 +42,14 @@ func (handler *Handler) Register(writer http.ResponseWriter, request *http.Reque
 	})
 
 	if errors.Is(err, ErrEmailAlreadyInUse) {
-		writeError(writer, http.StatusConflict, "Email já está em uso")
+		response.WriteTranslatedError(writer, request, handler.translator, http.StatusConflict, "user.emailInUse")
 		return
 	}
 
 	if err != nil {
-		writeError(writer, http.StatusInternalServerError, "Erro ao registrar usuário")
+		response.WriteTranslatedError(writer, request, handler.translator, http.StatusInternalServerError, "user.errorRegister")
 		return
 	}
 
-	writeJSON(writer, http.StatusCreated, createdUser)
-}
-
-func writeJSON(writer http.ResponseWriter, status int, data any) {
-	writer.Header().Set("Content-type", "application/json")
-	writer.WriteHeader(status)
-	json.NewEncoder(writer).Encode(data)
-}
-
-func writeError(writer http.ResponseWriter, status int, message string) {
-	writeJSON(writer, status, map[string]string{"message": message})
+	response.WriteJSON(writer, http.StatusCreated, createdUser)
 }

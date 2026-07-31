@@ -12,11 +12,17 @@ import (
 
 	"github.com/PietroTelino/go-api-template/internal/config"
 	"github.com/PietroTelino/go-api-template/internal/database"
+	"github.com/PietroTelino/go-api-template/internal/i18n"
 	"github.com/PietroTelino/go-api-template/internal/server"
 )
 
 func main() {
 	appConfig := config.Load()
+
+	translator, err := i18n.New("pt-BR", []string{"pt-BR", "en"})
+	if err != nil {
+		log.Fatalf("Falha ao conectar ao banco: %v", err)
+	}
 
 	dbPool, err := database.Connect(appConfig)
 	if err != nil {
@@ -29,7 +35,7 @@ func main() {
 
 	httpServer := &http.Server{
 		Addr:    fmt.Sprintf(":%d", appConfig.Port),
-		Handler: server.New(dbPool),
+		Handler: server.New(dbPool, appConfig, translator),
 	}
 
 	go func() {
