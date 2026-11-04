@@ -1,3 +1,4 @@
+-- +goose Up
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 CREATE TABLE IF NOT EXISTS users (
@@ -12,3 +13,6 @@ CREATE TABLE IF NOT EXISTS users (
     updated_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
     preferences    JSONB
 );
+
+-- +goose Down
+DROP TABLE IF EXISTS users;

@@ -63,7 +63,7 @@ func (tokenManager *TokenManager) ParseAccessToken(accessTokenString string) (*A
 
 	parsedToken, err := jwt.ParseWithClaims(accessTokenString, claims, func(token *jwt.Token) (any, error) {
 		if _, signingMethodIsHMAC := token.Method.(*jwt.SigningMethodHMAC); !signingMethodIsHMAC {
-			return nil, fmt.Errorf("Método de assinatura inesperado: %v", token.Header["alg"])
+			return nil, fmt.Errorf("método de assinatura inesperado: %v", token.Header["alg"])
 		}
 		return tokenManager.accessTokenSecret, nil
 	})
@@ -73,7 +73,7 @@ func (tokenManager *TokenManager) ParseAccessToken(accessTokenString string) (*A
 	}
 
 	if !parsedToken.Valid {
-		return nil, fmt.Errorf("Access token inválido")
+		return nil, fmt.Errorf("access token inválido")
 	}
 
 	return claims, nil
@@ -84,7 +84,7 @@ func (tokenManager *TokenManager) ParseRefreshToken(refreshTokenString string) (
 
 	parsedToken, err := jwt.ParseWithClaims(refreshTokenString, claims, func(token *jwt.Token) (any, error) {
 		if _, signingMethodIsHMAC := token.Method.(*jwt.SigningMethodHMAC); !signingMethodIsHMAC {
-			return nil, fmt.Errorf("Método de assinatura inesperado: %v", token.Header["alg"])
+			return nil, fmt.Errorf("método de assinatura inesperado: %v", token.Header["alg"])
 		}
 		return tokenManager.refreshTokenSecret, nil
 	})
@@ -94,7 +94,7 @@ func (tokenManager *TokenManager) ParseRefreshToken(refreshTokenString string) (
 	}
 
 	if !parsedToken.Valid {
-		return nil, fmt.Errorf("Refresh token inválido")
+		return nil, fmt.Errorf("refresh token inválido")
 	}
 
 	return claims, nil

@@ -21,7 +21,7 @@ func main() {
 
 	translator, err := i18n.New("pt-BR", []string{"pt-BR", "en"})
 	if err != nil {
-		log.Fatalf("Falha ao conectar ao banco: %v", err)
+		log.Fatalf("Falha ao carregar as traduções: %v", err)
 	}
 
 	dbPool, err := database.Connect(appConfig)

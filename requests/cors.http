@@ -1,0 +1,11 @@
+### Preflight de uma origem permitida
+OPTIONS http://localhost:3333/api/users
+Origin: http://localhost:5173
+Access-Control-Request-Method: POST
+Access-Control-Request-Headers: content-type
+
+### Preflight de uma origem não permitida
+OPTIONS http://localhost:3333/api/users
+Origin: http://site-nao-permitido.test
+Access-Control-Request-Method: POST
+Access-Control-Request-Headers: content-type

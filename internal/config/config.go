@@ -20,11 +20,23 @@ type Config struct {
 	JWTExpiresInSeconds        int
 	JWTRefreshSecret           string
 	JWTRefreshExpiresInSeconds int
+
+	EmailEnabled  bool
+	EmailHost     string
+	EmailPort     int
+	EmailSecure   bool
+	EmailUser     string
+	EmailPassword string
+	EmailFrom     string
+
+	FrontendURL string
+
+	PasswordResetExpiresMS int
 }
 
 func Load() *Config {
 	if err := godotenv.Load(); err != nil {
-		log.Println("Nenhum .env ecnontrado, usando variáveis do ambiente")
+		log.Println("Nenhum .env encontrado, usando variáveis do ambiente")
 	}
 
 	return &Config{
@@ -39,21 +51,43 @@ func Load() *Config {
 		JWTExpiresInSeconds:        getInt("JWT_EXPIRES_IN_SECONDS", 900),
 		JWTRefreshSecret:           require("JWT_REFRESH_SECRET"),
 		JWTRefreshExpiresInSeconds: getInt("JWT_REFRESH_EXPIRES_IN_SECONDS", 604800),
+
+		EmailEnabled:  getBool("EMAIL_ENABLED", false),
+		EmailHost:     os.Getenv("EMAIL_HOST"),
+		EmailPort:     getInt("EMAIL_PORT", 587),
+		EmailSecure:   getBool("EMAIL_SECURE", false),
+		EmailUser:     os.Getenv("EMAIL_USER"),
+		EmailPassword: os.Getenv("EMAIL_PASSWORD"),
+		EmailFrom:     getString("EMAIL_FROM", "no-reply@localhost"),
+
+		FrontendURL: require("FRONTEND_URL"),
+
+		PasswordResetExpiresMS: getInt("PASSWORD_RESET_EXPIRES_MS", 3600000),
 	}
 }
 
-func require(Key string) string {
-	variable := os.Getenv(Key)
+func require(key string) string {
+	variable := os.Getenv(key)
 
 	if variable == "" {
-		log.Fatalf("Variável de ambiente obrigatória não definida: %s", Key)
+		log.Fatalf("Variável de ambiente obrigatória não definida: %s", key)
 	}
 
 	return variable
 }
 
-func getInt(Key string, fallback int) int {
-	variable := os.Getenv(Key)
+func getString(key string, fallback string) string {
+	variable := os.Getenv(key)
+
+	if variable == "" {
+		return fallback
+	}
+
+	return variable
+}
+
+func getInt(key string, fallback int) int {
+	variable := os.Getenv(key)
 
 	if variable == "" {
 		return fallback
@@ -66,4 +100,20 @@ func getInt(Key string, fallback int) int {
 	}
 
 	return number
+}
+
+func getBool(key string, fallback bool) bool {
+	variable := os.Getenv(key)
+
+	if variable == "" {
+		return fallback
+	}
+
+	boolean, err := strconv.ParseBool(variable)
+
+	if err != nil {
+		return fallback
+	}
+
+	return boolean
 }

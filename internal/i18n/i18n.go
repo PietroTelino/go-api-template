@@ -7,6 +7,7 @@ import (
 	"strings"
 )
 
+//go:embed locales
 var embeddedTranslationFiles embed.FS
 
 type Translator struct {
@@ -23,12 +24,12 @@ func New(fallbackLanguage string, supportedLanguages []string) (*Translator, err
 
 		fileBytes, err := embeddedTranslationFiles.ReadFile(filepath)
 		if err != nil {
-			return nil, fmt.Errorf("Erro ao ler o arquivo de tradução do idioma %q: %w", language, err)
+			return nil, fmt.Errorf("erro ao ler o arquivo de tradução do idioma %q: %w", language, err)
 		}
 
 		var parsedTranslations map[string]any
 		if err := json.Unmarshal(fileBytes, &parsedTranslations); err != nil {
-			return nil, fmt.Errorf("Erro ao decodificar o arquivo de tradução do idioma %q: %w", language, err)
+			return nil, fmt.Errorf("erro ao decodificar o arquivo de tradução do idioma %q: %w", language, err)
 		}
 
 		translationsByLanguage[language] = parsedTranslations

@@ -3,6 +3,9 @@ package database
 import (
 	"context"
 	"fmt"
+	"net"
+	"net/url"
+	"strconv"
 	"time"
 
 	"github.com/PietroTelino/go-api-template/internal/config"
@@ -10,14 +13,17 @@ import (
 )
 
 func Connect(cfg *config.Config) (*pgxpool.Pool, error) {
-	url := fmt.Sprintf(
-		"postgresql://%s:%s@%s:%d/%s?sslmode=disable",
-		cfg.DBUser, cfg.DBPassword, cfg.DBHost, cfg.DBPort, cfg.DBName,
-	)
+	connectionURL := url.URL{
+		Scheme:   "postgresql",
+		User:     url.UserPassword(cfg.DBUser, cfg.DBPassword),
+		Host:     net.JoinHostPort(cfg.DBHost, strconv.Itoa(cfg.DBPort)),
+		Path:     "/" + cfg.DBName,
+		RawQuery: "sslmode=disable",
+	}
 
-	poolConfig, err := pgxpool.ParseConfig(url)
+	poolConfig, err := pgxpool.ParseConfig(connectionURL.String())
 	if err != nil {
-		return nil, fmt.Errorf("Erro ao parsear config do banco: %w", err)
+		return nil, fmt.Errorf("erro ao parsear config do banco: %w", err)
 	}
 
 	poolConfig.MaxConns = 20
@@ -30,11 +36,11 @@ func Connect(cfg *config.Config) (*pgxpool.Pool, error) {
 
 	pool, err := pgxpool.NewWithConfig(ctx, poolConfig)
 	if err != nil {
-		return nil, fmt.Errorf("Erro ao criar pool de conexões: %w", err)
+		return nil, fmt.Errorf("erro ao criar pool de conexões: %w", err)
 	}
 
 	if err := pool.Ping(ctx); err != nil {
-		return nil, fmt.Errorf("Banco inacessível: %w", err)
+		return nil, fmt.Errorf("banco inacessível: %w", err)
 	}
 
 	return pool, nil
