@@ -6,6 +6,7 @@ import (
 	"github.com/PietroTelino/go-api-template/internal/auth"
 	"github.com/PietroTelino/go-api-template/internal/config"
 	"github.com/PietroTelino/go-api-template/internal/i18n"
+	"github.com/PietroTelino/go-api-template/internal/modules/audit"
 	"github.com/PietroTelino/go-api-template/internal/modules/users"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -35,9 +36,12 @@ func New(dbPool *pgxpool.Pool, appConfig *config.Config, translator *i18n.Transl
 		responseWriter.Write([]byte("ok"))
 	})
 
+	auditRepository := audit.NewRepository(dbPool)
+	auditService := audit.NewService(auditRepository)
+
 	usersRepository := users.NewRepository(dbPool)
 	usersService := users.NewService(usersRepository)
-	usersHandler := users.NewHandler(usersService, translator)
+	usersHandler := users.NewHandler(usersService, auditService, translator)
 
 	router.Route("/api", func(apiRouter chi.Router) {
 		apiRouter.Post("/users", usersHandler.Register)

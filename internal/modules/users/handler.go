@@ -6,16 +6,18 @@ import (
 	"net/http"
 
 	"github.com/PietroTelino/go-api-template/internal/i18n"
+	"github.com/PietroTelino/go-api-template/internal/modules/audit"
 	"github.com/PietroTelino/go-api-template/internal/response"
 )
 
 type Handler struct {
-	service    *Service
-	translator *i18n.Translator
+	service      *Service
+	auditService *audit.Service
+	translator   *i18n.Translator
 }
 
-func NewHandler(service *Service, translator *i18n.Translator) *Handler {
-	return &Handler{service: service, translator: translator}
+func NewHandler(service *Service, auditService *audit.Service, translator *i18n.Translator) *Handler {
+	return &Handler{service: service, auditService: auditService, translator: translator}
 }
 
 func (handler *Handler) Register(writer http.ResponseWriter, request *http.Request) {
@@ -50,6 +52,19 @@ func (handler *Handler) Register(writer http.ResponseWriter, request *http.Reque
 		response.WriteTranslatedError(writer, request, handler.translator, http.StatusInternalServerError, "user.errorRegister")
 		return
 	}
+
+	ipAddress, userAgent := audit.ClientInfoFromRequest(request)
+
+	handler.auditService.Log(request.Context(), audit.Entry{
+		UserID:        &createdUser.ID,
+		PerformedByID: &createdUser.ID,
+		Action:        audit.ActionUserRegister,
+		Entity:        audit.EntityUser,
+		EntityID:      &createdUser.ID,
+		Details:       map[string]any{"email": createdUser.Email},
+		IPAddress:     ipAddress,
+		UserAgent:     userAgent,
+	})
 
 	response.WriteJSON(writer, http.StatusCreated, createdUser)
 }
