@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"crypto/rand"
 	"fmt"
 	"time"
 
@@ -49,6 +50,7 @@ func (tokenManager *TokenManager) GenerateAccessToken(userID string, userRole st
 
 func (tokenManager *TokenManager) GenerateRefreshToken(userID string) (string, error) {
 	claims := jwt.RegisteredClaims{
+		ID:        rand.Text(),
 		Subject:   userID,
 		IssuedAt:  jwt.NewNumericDate(time.Now()),
 		ExpiresAt: jwt.NewNumericDate(time.Now().Add(tokenManager.refreshTokenTTL)),

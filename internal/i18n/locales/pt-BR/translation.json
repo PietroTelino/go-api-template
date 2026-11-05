@@ -1,6 +1,7 @@
 {
     "common": {
-        "invalidRequestBody": "Corpo da requisição inválido"
+        "invalidRequestBody": "Corpo da requisição inválido",
+        "internalError": "Erro interno do servidor"
     },
     "auth": {
         "emailPasswordRequired": "Email e senha são obrigatórios",
@@ -71,6 +72,7 @@
         "invalidOrExpiredToken": "Token inválido ou expirado",
         "mustBeText": "A senha deve ser um texto.",
         "minLength": "A senha deve ter no mínimo 8 caracteres.",
+        "maxLength": "A senha deve ter no máximo 72 bytes.",
         "specialChar": "A senha deve conter pelo menos 1 caractere especial."
     },
     "email": {

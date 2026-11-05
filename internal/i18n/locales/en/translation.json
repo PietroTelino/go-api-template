@@ -1,6 +1,7 @@
 {
     "common": {
-        "invalidRequestBody": "Invalid request body"
+        "invalidRequestBody": "Invalid request body",
+        "internalError": "Internal server error"
     },
     "auth": {
         "emailPasswordRequired": "Email and password are required",
@@ -71,6 +72,7 @@
         "invalidOrExpiredToken": "Invalid or expired token",
         "mustBeText": "Password must be a string.",
         "minLength": "Password must be at least 8 characters.",
+        "maxLength": "Password must be at most 72 bytes.",
         "specialChar": "Password must contain at least 1 special character."
     },
     "email": {

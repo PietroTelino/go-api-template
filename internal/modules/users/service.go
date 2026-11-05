@@ -2,12 +2,9 @@ package users
 
 import (
 	"context"
-	"errors"
 
 	"golang.org/x/crypto/bcrypt"
 )
-
-var ErrEmailAlreadyInUse = errors.New("user.emailInUse")
 
 type Service struct {
 	repository *Repository
@@ -18,13 +15,24 @@ func NewService(repository *Repository) *Service {
 }
 
 type RegisterInput struct {
-	Name     string
-	Email    string
-	Password string
+	Name        string
+	Email       string
+	Password    string
+	Preferences map[string]any
 }
 
 func (service *Service) Register(ctx context.Context, input RegisterInput) (*User, error) {
-	existingUser, err := service.repository.FindByEmail(ctx, input.Email)
+	email := NormalizeEmail(input.Email)
+
+	if err := ValidateEmail(email); err != nil {
+		return nil, err
+	}
+
+	if err := ValidatePassword(input.Password); err != nil {
+		return nil, err
+	}
+
+	existingUser, err := service.repository.FindByEmail(ctx, email)
 	if err != nil {
 		return nil, err
 	}
@@ -38,10 +46,11 @@ func (service *Service) Register(ctx context.Context, input RegisterInput) (*Use
 		return nil, err
 	}
 
-	createdUser, err := service.repository.Create(ctx, input.Name, input.Email, string(hashedPassword))
-	if err != nil {
-		return nil, err
-	}
-
-	return createdUser, nil
+	return service.repository.Create(ctx, CreateParams{
+		Name:        input.Name,
+		Email:       email,
+		Password:    string(hashedPassword),
+		Role:        RoleUser,
+		Preferences: input.Preferences,
+	})
 }

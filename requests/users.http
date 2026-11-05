@@ -1,27 +1,68 @@
-### Registrar usuário
+### Registrar usuário (deve retornar 201)
 POST http://localhost:3333/api/users
 Content-Type: application/json
 
 {
-  "name": "Usuário teste 02",
-  "email": "usuarioteste02@email.com",
+  "name": "Usuário teste 10",
+  "email": "usuarioteste10@email.com",
+  "password": "Senha@123"
+}
+
+### Mesmo e-mail em maiúsculas (deve retornar 409)
+POST http://localhost:3333/api/users
+Content-Type: application/json
+
+{
+  "name": "Usuário teste 10",
+  "email": "USUARIOTESTE10@EMAIL.COM",
+  "password": "Senha@123"
+}
+
+### Registrar com preferências (deve retornar 201)
+POST http://localhost:3333/api/users
+Content-Type: application/json
+
+{
+  "name": "Usuário teste 11",
+  "email": "usuarioteste11@email.com",
+  "password": "Senha@123",
+  "preferences": { "theme": "dark" }
+}
+
+### E-mail inválido (deve retornar 400)
+POST http://localhost:3333/api/users
+Content-Type: application/json
+
+{
+  "name": "Usuário teste 12",
+  "email": "email-invalido",
+  "password": "Senha@123"
+}
+
+### Senha curta (deve retornar 400)
+POST http://localhost:3333/api/users
+Content-Type: application/json
+
+{
+  "name": "Usuário teste 12",
+  "email": "usuarioteste12@email.com",
+  "password": "a@1"
+}
+
+### Senha sem caractere especial (deve retornar 400)
+POST http://localhost:3333/api/users
+Content-Type: application/json
+
+{
+  "name": "Usuário teste 12",
+  "email": "usuarioteste12@email.com",
   "password": "12345678"
 }
 
-### Tentar registrar com o mesmo email (deve retornar 409)
+### Sem campos obrigatórios (deve retornar 400)
 POST http://localhost:3333/api/users
 Content-Type: application/json
 
 {
-  "name": "Usuário teste 01",
-  "email": "usuarioteste01@email.com",
-  "password": "12345678"
-}
-
-### Tentar registrar sem campos obrigatórios (deve retornar 400)
-POST http://localhost:3333/api/users
-Content-Type: application/json
-
-{
-  "name": "Usuário teste 01"
+  "name": "Usuário teste 12"
 }

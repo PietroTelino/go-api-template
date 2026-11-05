@@ -1,0 +1,51 @@
+### Login
+# @name login
+POST http://localhost:3333/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "usuarioteste10@email.com",
+  "password": "Senha@123"
+}
+
+### Refresh
+# @name refresh
+POST http://localhost:3333/api/auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "{{login.response.body.refreshToken}}"
+}
+
+### Reusar o refresh token antigo (deve retornar 401)
+POST http://localhost:3333/api/auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "{{login.response.body.refreshToken}}"
+}
+
+### Logout
+POST http://localhost:3333/api/auth/logout
+Authorization: Bearer {{refresh.response.body.accessToken}}
+Content-Type: application/json
+
+{
+  "refreshToken": "{{refresh.response.body.refreshToken}}"
+}
+
+### Logout de todas as sessões
+POST http://localhost:3333/api/auth/logout-all
+Authorization: Bearer {{refresh.response.body.accessToken}}
+
+### Senha errada (deve retornar 401)
+POST http://localhost:3333/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "usuarioteste10@email.com",
+  "password": "Errada@123"
+}
+
+### Logout sem token (deve retornar 401)
+POST http://localhost:3333/api/auth/logout
