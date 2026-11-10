@@ -2,14 +2,17 @@ package server
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/PietroTelino/go-api-template/internal/auth"
 	"github.com/PietroTelino/go-api-template/internal/config"
 	"github.com/PietroTelino/go-api-template/internal/i18n"
 	"github.com/PietroTelino/go-api-template/internal/modules/audit"
 	"github.com/PietroTelino/go-api-template/internal/modules/authentication"
+	"github.com/PietroTelino/go-api-template/internal/modules/passwordreset"
 	"github.com/PietroTelino/go-api-template/internal/modules/sessions"
 	"github.com/PietroTelino/go-api-template/internal/modules/users"
+	"github.com/PietroTelino/go-api-template/internal/notifications"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
@@ -43,14 +46,27 @@ func New(dbPool *pgxpool.Pool, appConfig *config.Config, translator *i18n.Transl
 	auditRepository := audit.NewRepository(dbPool)
 	auditService := audit.NewService(auditRepository)
 
+	emailService := notifications.NewEmailService(appConfig)
+
 	sessionsRepository := sessions.NewRepository(dbPool)
 
 	usersRepository := users.NewRepository(dbPool)
-	usersService := users.NewService(usersRepository, sessionsRepository)
+	usersService := users.NewService(usersRepository, sessionsRepository, emailService)
 	usersHandler := users.NewHandler(usersService, auditService, translator)
 
 	authenticationService := authentication.NewService(usersRepository, sessionsRepository, tokenManager)
 	authenticationHandler := authentication.NewHandler(authenticationService, auditService, translator)
+
+	passwordResetRepository := passwordreset.NewRepository(dbPool)
+	passwordResetService := passwordreset.NewService(
+		usersRepository,
+		passwordResetRepository,
+		sessionsRepository,
+		emailService,
+		time.Duration(appConfig.PasswordResetExpiresMS)*time.Millisecond,
+		appConfig.FrontendURL,
+	)
+	passwordResetHandler := passwordreset.NewHandler(passwordResetService, auditService, translator)
 
 	router.Route("/api", func(apiRouter chi.Router) {
 		apiRouter.Route("/users", func(usersRouter chi.Router) {
@@ -75,6 +91,7 @@ func New(dbPool *pgxpool.Pool, appConfig *config.Config, translator *i18n.Transl
 					adminRouter.Patch("/{id}/restore", usersHandler.Restore)
 					adminRouter.Patch("/{id}/inactivate", usersHandler.Inactivate)
 					adminRouter.Patch("/{id}/reactivate", usersHandler.Reactivate)
+					adminRouter.Post("/{id}/reset-password", usersHandler.AdminResetPassword)
 
 					adminRouter.With(requireGod).Delete("/{id}/hard", usersHandler.HardDelete)
 				})
@@ -87,6 +104,11 @@ func New(dbPool *pgxpool.Pool, appConfig *config.Config, translator *i18n.Transl
 
 			authRouter.With(requireAuthentication).Post("/logout", authenticationHandler.Logout)
 			authRouter.With(requireAuthentication).Post("/logout-all", authenticationHandler.LogoutAll)
+		})
+
+		apiRouter.Route("/password-reset", func(passwordResetRouter chi.Router) {
+			passwordResetRouter.Post("/request", passwordResetHandler.Request)
+			passwordResetRouter.Post("/confirm", passwordResetHandler.Confirm)
 		})
 	})
 

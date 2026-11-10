@@ -24,4 +24,6 @@ var (
 	ErrCannotModifyGod     = errors.New("user.cannotModifyGod")
 	ErrCannotInactivateGod = errors.New("user.cannotInactivateGod")
 	ErrCannotDeleteGod     = errors.New("user.cannotDeleteGod")
+
+	ErrCannotResetGodPassword = errors.New("user.cannotResetGodPassword")
 )

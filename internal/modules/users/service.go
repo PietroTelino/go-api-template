@@ -2,6 +2,7 @@ package users
 
 import (
 	"context"
+	"fmt"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -10,13 +11,18 @@ type SessionRevoker interface {
 	RevokeAllByUser(ctx context.Context, userID string) error
 }
 
-type Service struct {
-	repository     *Repository
-	sessionRevoker SessionRevoker
+type AdminPasswordNotifier interface {
+	SendAdminPasswordReset(to string, newPassword string) error
 }
 
-func NewService(repository *Repository, sessionRevoker SessionRevoker) *Service {
-	return &Service{repository: repository, sessionRevoker: sessionRevoker}
+type Service struct {
+	repository       *Repository
+	sessionRevoker   SessionRevoker
+	passwordNotifier AdminPasswordNotifier
+}
+
+func NewService(repository *Repository, sessionRevoker SessionRevoker, passwordNotifier AdminPasswordNotifier) *Service {
+	return &Service{repository: repository, sessionRevoker: sessionRevoker, passwordNotifier: passwordNotifier}
 }
 
 type RegisterInput struct {
@@ -290,6 +296,41 @@ func (service *Service) Reactivate(ctx context.Context, id string) (*User, error
 	}
 
 	return user, service.repository.Reactivate(ctx, id)
+}
+
+func (service *Service) AdminResetPassword(ctx context.Context, id string) (*User, error) {
+	user, err := service.findExisting(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	if user.Role == RoleGod {
+		return nil, ErrCannotResetGodPassword
+	}
+
+	newPassword, err := generateRandomPassword()
+	if err != nil {
+		return nil, err
+	}
+
+	hashedPassword, err := hashPassword(newPassword)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := service.repository.UpdatePassword(ctx, id, hashedPassword); err != nil {
+		return nil, err
+	}
+
+	if err := service.sessionRevoker.RevokeAllByUser(ctx, id); err != nil {
+		return nil, err
+	}
+
+	if err := service.passwordNotifier.SendAdminPasswordReset(user.Email, newPassword); err != nil {
+		return nil, fmt.Errorf("senha alterada, mas o e-mail não foi enviado: %w", err)
+	}
+
+	return user, nil
 }
 
 func (service *Service) HardDelete(ctx context.Context, id string) (*User, error) {

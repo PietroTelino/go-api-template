@@ -58,6 +58,10 @@ Authorization: Bearer {{godLogin.response.body.accessToken}}
 PATCH http://localhost:3333/api/users/{{createUser.response.body.id}}/reactivate
 Authorization: Bearer {{godLogin.response.body.accessToken}}
 
+### Resetar a senha (envia a nova senha por e-mail)
+POST http://localhost:3333/api/users/{{createUser.response.body.id}}/reset-password
+Authorization: Bearer {{godLogin.response.body.accessToken}}
+
 ### Excluir (soft delete)
 DELETE http://localhost:3333/api/users/{{createUser.response.body.id}}
 Authorization: Bearer {{godLogin.response.body.accessToken}}

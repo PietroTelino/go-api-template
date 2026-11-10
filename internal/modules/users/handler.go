@@ -55,6 +55,8 @@ var errorStatusCodes = map[error]int{
 	ErrCannotModifyGod:       http.StatusForbidden,
 	ErrCannotInactivateGod:   http.StatusForbidden,
 	ErrCannotDeleteGod:       http.StatusForbidden,
+
+	ErrCannotResetGodPassword: http.StatusForbidden,
 }
 
 func statusCodeForError(err error) (int, bool) {
@@ -391,6 +393,23 @@ func (handler *Handler) runAdminAction(
 	handler.logAction(request, &targetUser.ID, actor.ID, auditAction, audit.EntityUser, targetUser.ID, map[string]any{"email": targetUser.Email})
 
 	handler.writeMessage(writer, request, successKey)
+}
+
+func (handler *Handler) AdminResetPassword(writer http.ResponseWriter, request *http.Request) {
+	actor, isAuthenticated := handler.authenticatedUser(writer, request)
+	if !isAuthenticated {
+		return
+	}
+
+	targetUser, err := handler.service.AdminResetPassword(request.Context(), chi.URLParam(request, "id"))
+	if err != nil {
+		handler.writeServiceError(writer, request, err, "user.errorResetPassword")
+		return
+	}
+
+	handler.logAction(request, &targetUser.ID, actor.ID, audit.ActionPasswordAdminReset, audit.EntityPassword, targetUser.ID, map[string]any{"email": targetUser.Email})
+
+	handler.writeMessage(writer, request, "user.passwordReset")
 }
 
 func (handler *Handler) HardDelete(writer http.ResponseWriter, request *http.Request) {

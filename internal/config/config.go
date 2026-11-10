@@ -39,7 +39,7 @@ func Load() *Config {
 		log.Println("Nenhum .env encontrado, usando variáveis do ambiente")
 	}
 
-	return &Config{
+	appConfig := &Config{
 		Port:       getInt("PORT", 3333),
 		DBHost:     require("DB_HOST"),
 		DBPort:     getInt("DB_PORT", 5432),
@@ -64,6 +64,12 @@ func Load() *Config {
 
 		PasswordResetExpiresMS: getInt("PASSWORD_RESET_EXPIRES_MS", 3600000),
 	}
+
+	if appConfig.EmailEnabled && appConfig.EmailHost == "" {
+		log.Fatal("EMAIL_HOST é obrigatória quando EMAIL_ENABLED=true")
+	}
+
+	return appConfig
 }
 
 func require(key string) string {
