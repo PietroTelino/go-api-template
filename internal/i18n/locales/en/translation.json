@@ -61,7 +61,12 @@
         "invalidTheme": "Theme must be light or dark.",
         "sessionRequired": "sessionId is required",
         "sessionNotFound": "Session not found",
-        "sessionTerminated": "Session terminated successfully."
+        "sessionTerminated": "Session terminated successfully.",
+        "cannotModifyGod": "Cannot modify a GOD user",
+        "invalidRole": "Role must be user or administrator.",
+        "cannotAssignRole": "You are not allowed to assign this role.",
+        "passwordRequired": "Password is required.",
+        "passwordsRequired": "Current password and new password are required."
     },
     "password": {
         "emailRequired": "Email is required",

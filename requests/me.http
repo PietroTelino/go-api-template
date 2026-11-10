@@ -1,0 +1,51 @@
+### Login
+# @name login
+POST http://localhost:3333/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "usuarioteste10@email.com",
+  "password": "Senha@123"
+}
+
+### Mudar o tema
+PATCH http://localhost:3333/api/users/me/preferences
+Authorization: Bearer {{login.response.body.accessToken}}
+Content-Type: application/json
+
+{
+  "theme": "dark"
+}
+
+### Tema inválido (deve retornar 400)
+PATCH http://localhost:3333/api/users/me/preferences
+Authorization: Bearer {{login.response.body.accessToken}}
+Content-Type: application/json
+
+{
+  "theme": "azul"
+}
+
+### Trocar a senha
+PATCH http://localhost:3333/api/users/me/password
+Authorization: Bearer {{login.response.body.accessToken}}
+Content-Type: application/json
+
+{
+  "currentPassword": "Senha@123",
+  "newPassword": "Nova@1234"
+}
+
+### Voltar para a senha original
+PATCH http://localhost:3333/api/users/me/password
+Authorization: Bearer {{login.response.body.accessToken}}
+Content-Type: application/json
+
+{
+  "currentPassword": "Nova@1234",
+  "newPassword": "Senha@123"
+}
+
+### Usuário comum tentando listar (deve retornar 403)
+GET http://localhost:3333/api/users
+Authorization: Bearer {{login.response.body.accessToken}}

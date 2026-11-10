@@ -37,21 +37,49 @@ func New(dbPool *pgxpool.Pool, appConfig *config.Config, translator *i18n.Transl
 
 	tokenManager := auth.NewTokenManager(appConfig)
 	requireAuthentication := auth.RequireAuthentication(tokenManager, translator)
+	requireAdmin := auth.RequiredRoles(translator, users.RoleAdministrator, users.RoleGod)
+	requireGod := auth.RequiredRoles(translator, users.RoleGod)
 
 	auditRepository := audit.NewRepository(dbPool)
 	auditService := audit.NewService(auditRepository)
 
-	usersRepository := users.NewRepository(dbPool)
-	usersService := users.NewService(usersRepository)
-	usersHandler := users.NewHandler(usersService, auditService, translator)
-
 	sessionsRepository := sessions.NewRepository(dbPool)
+
+	usersRepository := users.NewRepository(dbPool)
+	usersService := users.NewService(usersRepository, sessionsRepository)
+	usersHandler := users.NewHandler(usersService, auditService, translator)
 
 	authenticationService := authentication.NewService(usersRepository, sessionsRepository, tokenManager)
 	authenticationHandler := authentication.NewHandler(authenticationService, auditService, translator)
 
 	router.Route("/api", func(apiRouter chi.Router) {
-		apiRouter.Post("/users", usersHandler.Register)
+		apiRouter.Route("/users", func(usersRouter chi.Router) {
+			usersRouter.Post("/", usersHandler.Register)
+
+			usersRouter.Group(func(authenticatedRouter chi.Router) {
+				authenticatedRouter.Use(requireAuthentication)
+
+				authenticatedRouter.Patch("/me/preferences", usersHandler.UpdateMyPreferences)
+				authenticatedRouter.Patch("/me/password", usersHandler.ChangeMyPassword)
+				authenticatedRouter.Delete("/me/delete", usersHandler.SelfDelete)
+
+				authenticatedRouter.Group(func(adminRouter chi.Router) {
+					adminRouter.Use(requireAdmin)
+
+					adminRouter.Get("/", usersHandler.List)
+					adminRouter.Get("/deleted-users", usersHandler.ListDeleted)
+					adminRouter.Get("/{id}", usersHandler.GetByID)
+					adminRouter.Post("/create", usersHandler.Create)
+					adminRouter.Put("/{id}", usersHandler.Update)
+					adminRouter.Delete("/{id}", usersHandler.Delete)
+					adminRouter.Patch("/{id}/restore", usersHandler.Restore)
+					adminRouter.Patch("/{id}/inactivate", usersHandler.Inactivate)
+					adminRouter.Patch("/{id}/reactivate", usersHandler.Reactivate)
+
+					adminRouter.With(requireGod).Delete("/{id}/hard", usersHandler.HardDelete)
+				})
+			})
+		})
 
 		apiRouter.Route("/auth", func(authRouter chi.Router) {
 			authRouter.Post("/login", authenticationHandler.Login)

@@ -14,6 +14,7 @@ const (
 var (
 	emailPattern       = regexp.MustCompile(`^[^\s@]+@[^\s@]+\.[^\s@]+$`)
 	specialCharPattern = regexp.MustCompile(`[^a-zA-Z0-9]`)
+	uuidPattern        = regexp.MustCompile(`^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$`)
 )
 
 func NormalizeEmail(email string) string {
@@ -46,4 +47,24 @@ func ValidatePassword(password string) error {
 	}
 
 	return nil
+}
+
+func IsValidID(id string) bool {
+	return uuidPattern.MatchString(id)
+}
+
+func ValidateRoleAssignment(actorRole string, targetRole string) error {
+	switch targetRole {
+	case RoleUser:
+		return nil
+	case RoleAdministrator:
+		if actorRole == RoleGod {
+			return nil
+		}
+		return ErrCannotAssignRole
+	case RoleGod:
+		return ErrCannotAssignRole
+	default:
+		return ErrInvalidRole
+	}
 }

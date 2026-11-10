@@ -61,7 +61,12 @@
         "invalidTheme": "O tema deve ser light ou dark.",
         "sessionRequired": "sessionId é obrigatório",
         "sessionNotFound": "Sessão não encontrada",
-        "sessionTerminated": "A sessão foi finalizada com sucesso."
+        "sessionTerminated": "A sessão foi finalizada com sucesso.",
+        "cannotModifyGod": "Não é possível alterar um usuário GOD",
+        "invalidRole": "O papel deve ser user ou administrator.",
+        "cannotAssignRole": "Você não tem permissão para atribuir este papel.",
+        "passwordRequired": "A senha é obrigatória.",
+        "passwordsRequired": "A senha atual e a nova senha são obrigatórias."
     },
     "password": {
         "emailRequired": "Email é obrigatório",

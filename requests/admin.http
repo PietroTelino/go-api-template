@@ -1,0 +1,75 @@
+### Login do GOD
+# @name godLogin
+POST http://localhost:3333/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "god@god.com",
+  "password": "12345678"
+}
+
+### Criar usuário
+# @name createUser
+POST http://localhost:3333/api/users/create
+Authorization: Bearer {{godLogin.response.body.accessToken}}
+Content-Type: application/json
+
+{
+  "name": "Criado pelo admin",
+  "email": "criadopeloadmin@email.com",
+  "password": "Senha@123",
+  "role": "user"
+}
+
+### Tentar criar outro GOD (deve retornar 403)
+POST http://localhost:3333/api/users/create
+Authorization: Bearer {{godLogin.response.body.accessToken}}
+Content-Type: application/json
+
+{
+  "name": "Outro god",
+  "email": "outrogod@email.com",
+  "password": "Senha@123",
+  "role": "god"
+}
+
+### Listar usuários
+GET http://localhost:3333/api/users
+Authorization: Bearer {{godLogin.response.body.accessToken}}
+
+### Buscar por ID
+GET http://localhost:3333/api/users/{{createUser.response.body.id}}
+Authorization: Bearer {{godLogin.response.body.accessToken}}
+
+### Atualizar
+PUT http://localhost:3333/api/users/{{createUser.response.body.id}}
+Authorization: Bearer {{godLogin.response.body.accessToken}}
+Content-Type: application/json
+
+{
+  "name": "Nome atualizado"
+}
+
+### Desativar
+PATCH http://localhost:3333/api/users/{{createUser.response.body.id}}/inactivate
+Authorization: Bearer {{godLogin.response.body.accessToken}}
+
+### Reativar
+PATCH http://localhost:3333/api/users/{{createUser.response.body.id}}/reactivate
+Authorization: Bearer {{godLogin.response.body.accessToken}}
+
+### Excluir (soft delete)
+DELETE http://localhost:3333/api/users/{{createUser.response.body.id}}
+Authorization: Bearer {{godLogin.response.body.accessToken}}
+
+### Listar excluídos
+GET http://localhost:3333/api/users/deleted-users
+Authorization: Bearer {{godLogin.response.body.accessToken}}
+
+### Restaurar
+PATCH http://localhost:3333/api/users/{{createUser.response.body.id}}/restore
+Authorization: Bearer {{godLogin.response.body.accessToken}}
+
+### Excluir permanentemente (rode por último)
+DELETE http://localhost:3333/api/users/{{createUser.response.body.id}}/hard
+Authorization: Bearer {{godLogin.response.body.accessToken}}
