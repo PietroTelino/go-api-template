@@ -66,7 +66,9 @@
         "invalidRole": "Role must be user or administrator.",
         "cannotAssignRole": "You are not allowed to assign this role.",
         "passwordRequired": "Password is required.",
-        "passwordsRequired": "Current password and new password are required."
+        "passwordsRequired": "Current password and new password are required.",
+        "errorListSessions": "Error listing sessions",
+        "errorTerminateSession": "Error terminating session"
     },
     "password": {
         "emailRequired": "Email is required",
@@ -79,6 +81,12 @@
         "minLength": "Password must be at least 8 characters.",
         "maxLength": "Password must be at most 72 bytes.",
         "specialChar": "Password must contain at least 1 special character."
+    },
+    "audit": {
+        "notFound": "Audit log not found",
+        "errorList": "Error listing audit logs",
+        "errorListMine": "Error listing your audit logs",
+        "errorFind": "Error finding audit log"
     },
     "email": {
         "mustBeText": "Email must be a string.",

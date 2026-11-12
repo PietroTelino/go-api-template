@@ -5,7 +5,10 @@ import (
 	"time"
 )
 
-var ErrRefreshTokenNotActive = errors.New("auth.refreshTokenInvalid")
+var (
+	ErrRefreshTokenNotActive = errors.New("auth.refreshTokenInvalid")
+	ErrSessionNotFound       = errors.New("user.sessionNotFound")
+)
 
 type RefreshToken struct {
 	ID        string
@@ -16,6 +19,14 @@ type RefreshToken struct {
 	Revoked   bool
 	UserAgent *string
 	IPAddress *string
+}
+
+type Session struct {
+	ID        string    `json:"id"`
+	CreatedAt time.Time `json:"createdAt"`
+	ExpiresAt time.Time `json:"expiresAt"`
+	UserAgent *string   `json:"userAgent"`
+	IPAddress *string   `json:"ipAddress"`
 }
 
 type CreateParams struct {

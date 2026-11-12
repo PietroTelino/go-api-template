@@ -66,7 +66,9 @@
         "invalidRole": "O papel deve ser user ou administrator.",
         "cannotAssignRole": "Você não tem permissão para atribuir este papel.",
         "passwordRequired": "A senha é obrigatória.",
-        "passwordsRequired": "A senha atual e a nova senha são obrigatórias."
+        "passwordsRequired": "A senha atual e a nova senha são obrigatórias.",
+        "errorListSessions": "Erro ao listar sessões",
+        "errorTerminateSession": "Erro ao finalizar a sessão"
     },
     "password": {
         "emailRequired": "Email é obrigatório",
@@ -79,6 +81,12 @@
         "minLength": "A senha deve ter no mínimo 8 caracteres.",
         "maxLength": "A senha deve ter no máximo 72 bytes.",
         "specialChar": "A senha deve conter pelo menos 1 caractere especial."
+    },
+    "audit": {
+        "notFound": "Log de auditoria não encontrado",
+        "errorList": "Erro ao listar logs de auditoria",
+        "errorListMine": "Erro ao listar seus logs de auditoria",
+        "errorFind": "Erro ao buscar log de auditoria"
     },
     "email": {
         "mustBeText": "O e-mail deve ser um texto.",

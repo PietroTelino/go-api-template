@@ -1,0 +1,22 @@
+### Login
+# @name login
+POST http://localhost:3333/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "usuarioteste10@email.com",
+  "password": "Senha@123"
+}
+
+### Listar minhas sessões ativas
+# @name mySessions
+GET http://localhost:3333/api/sessions/me
+Authorization: Bearer {{login.response.body.accessToken}}
+
+### Encerrar uma sessão (a primeira da lista)
+DELETE http://localhost:3333/api/sessions/me/{{mySessions.response.body.$[0].id}}
+Authorization: Bearer {{login.response.body.accessToken}}
+
+### Sessão inexistente (deve retornar 404)
+DELETE http://localhost:3333/api/sessions/me/00000000-0000-0000-0000-000000000000
+Authorization: Bearer {{login.response.body.accessToken}}

@@ -4,6 +4,8 @@ import (
 	"regexp"
 	"strings"
 	"unicode/utf8"
+
+	"github.com/PietroTelino/go-api-template/internal/validation"
 )
 
 const (
@@ -14,7 +16,6 @@ const (
 var (
 	emailPattern       = regexp.MustCompile(`^[^\s@]+@[^\s@]+\.[^\s@]+$`)
 	specialCharPattern = regexp.MustCompile(`[^a-zA-Z0-9]`)
-	uuidPattern        = regexp.MustCompile(`^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$`)
 )
 
 func NormalizeEmail(email string) string {
@@ -50,7 +51,7 @@ func ValidatePassword(password string) error {
 }
 
 func IsValidID(id string) bool {
-	return uuidPattern.MatchString(id)
+	return validation.IsUUID(id)
 }
 
 func ValidateRoleAssignment(actorRole string, targetRole string) error {

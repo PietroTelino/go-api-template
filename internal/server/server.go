@@ -45,10 +45,13 @@ func New(dbPool *pgxpool.Pool, appConfig *config.Config, translator *i18n.Transl
 
 	auditRepository := audit.NewRepository(dbPool)
 	auditService := audit.NewService(auditRepository)
+	auditHandler := audit.NewHandler(auditService, translator)
 
 	emailService := notifications.NewEmailService(appConfig)
 
 	sessionsRepository := sessions.NewRepository(dbPool)
+	sessionsService := sessions.NewService(sessionsRepository)
+	sessionsHandler := sessions.NewHandler(sessionsService, auditService, translator)
 
 	usersRepository := users.NewRepository(dbPool)
 	usersService := users.NewService(usersRepository, sessionsRepository, emailService)
@@ -109,6 +112,21 @@ func New(dbPool *pgxpool.Pool, appConfig *config.Config, translator *i18n.Transl
 		apiRouter.Route("/password-reset", func(passwordResetRouter chi.Router) {
 			passwordResetRouter.Post("/request", passwordResetHandler.Request)
 			passwordResetRouter.Post("/confirm", passwordResetHandler.Confirm)
+		})
+
+		apiRouter.Route("/sessions", func(sessionsRouter chi.Router) {
+			sessionsRouter.Use(requireAuthentication)
+
+			sessionsRouter.Get("/me", sessionsHandler.ListMySessions)
+			sessionsRouter.Delete("/me/{sessionId}", sessionsHandler.TerminateSession)
+		})
+
+		apiRouter.Route("/audit", func(auditRouter chi.Router) {
+			auditRouter.Use(requireAuthentication)
+
+			auditRouter.Get("/me", auditHandler.ListMine)
+			auditRouter.With(requireAdmin).Get("/", auditHandler.List)
+			auditRouter.With(requireAdmin).Get("/{id}", auditHandler.GetByID)
 		})
 	})
 

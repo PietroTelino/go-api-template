@@ -66,6 +66,52 @@ func (repository *Repository) FindByToken(ctx context.Context, token string) (*R
 	return refreshToken, nil
 }
 
+func (repository *Repository) FindActiveByUser(ctx context.Context, userID string) ([]*Session, error) {
+	query := `
+		SELECT id, created_at, expires_at, user_agent, ip_address
+		FROM refresh_tokens
+		WHERE user_id = $1 AND revoked = false AND expires_at > now()
+		ORDER BY created_at DESC
+	`
+
+	rows, err := repository.dbPool.Query(ctx, query, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	activeSessions := []*Session{}
+
+	for rows.Next() {
+		session := &Session{}
+
+		if err := rows.Scan(&session.ID, &session.CreatedAt, &session.ExpiresAt, &session.UserAgent, &session.IPAddress); err != nil {
+			return nil, err
+		}
+
+		activeSessions = append(activeSessions, session)
+	}
+
+	return activeSessions, rows.Err()
+}
+
+func (repository *Repository) RevokeByIDForUser(ctx context.Context, sessionID string, userID string) (bool, error) {
+	commandTag, err := repository.dbPool.Exec(
+		ctx,
+		`UPDATE refresh_tokens
+		SET revoked = true
+		WHERE id = $1 AND user_id = $2 AND revoked = false AND expires_at > now()`,
+		sessionID,
+		userID,
+	)
+
+	if err != nil {
+		return false, err
+	}
+
+	return commandTag.RowsAffected() > 0, nil
+}
+
 func (repository *Repository) Rotate(ctx context.Context, currentToken string, newToken CreateParams) error {
 	return pgx.BeginFunc(ctx, repository.dbPool, func(transaction pgx.Tx) error {
 		commandTag, err := transaction.Exec(
